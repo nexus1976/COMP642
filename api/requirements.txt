@@ -1,0 +1,15 @@
+asyncpg
+databases
+fastapi
+fastapi-utils-sqlalch2
+fastapi-utilities
+fastapi-versioning
+gunicorn
+httpx
+loguru
+pydantic
+pyjwt
+psycopg2-binary
+SQLAlchemy
+sqlalchemy-utils
+uvicorn
