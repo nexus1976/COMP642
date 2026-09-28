@@ -16,7 +16,13 @@
                 "8890"
             ],
             "jinja": true,
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_UID": "dbuser",
+                "DB_NAME": "group4db",
+                "DB_PWD": "password1234"
+            }            
         }
     ]
 }

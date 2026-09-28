@@ -3,10 +3,15 @@ import uuid
 from typing import List
 from fastapi import FastAPI, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from api.infrastructure.postgres.dbcontext import DBContext
+
+from services.events_router import router as events_router
+from services.users_router import router as users_router
+from services.orders_router import router as orders_router
 
 VERSION: str = '1.0.1'
 app = FastAPI(
-    title='coding_class_api',
+    title='Group 4 Project API',
     version=VERSION,
     docs_url='/docs',
     redoc_url='/redoc'
@@ -20,6 +25,11 @@ origins = [
     'http://0.0.0.0:8890/'
 ]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_headers=['*'], allow_methods=['*'], expose_headers=['*'])
+
+app.include_router(events_router)
+app.include_router(users_router)
+app.include_router(orders_router)
+
 @app.get('/versionz')
 def versionz():
     return app.version

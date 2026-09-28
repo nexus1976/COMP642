@@ -1,5 +1,7 @@
+alembic
 asyncpg
 databases
+email-validator
 fastapi
 fastapi-utils-sqlalch2
 fastapi-utilities
@@ -9,7 +11,10 @@ httpx
 loguru
 pydantic
 pyjwt
+python-dotenv
+pytest
+python-multipart
 psycopg2-binary
-SQLAlchemy
+SQLAlchemy==2.0.19
 sqlalchemy-utils
 uvicorn

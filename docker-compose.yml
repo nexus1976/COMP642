@@ -49,6 +49,11 @@ services:
       - local-mongodb
       - local-redis
       - local-postgres
+    environment:
+      - DB_HOST=localhost
+      - DB_UID=dbuser
+      - DB_NAME=group4db
+      - DB_PWD=password1234
 
   comp642-web:
     image: comp642-web
