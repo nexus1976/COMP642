@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
-from models.tickettype import TicketType
+from api.models.tickettype import TicketType
 from api.infrastructure.postgres.tickettypes import TicketType as TicketTypeModel
 from api.infrastructure.postgres.dbcontext import DBContext
 
@@ -65,7 +65,7 @@ class TicketTypeRepository():
     def getall(self) -> List[TicketType]:
         response: List[TicketType] = list()
         session: Session = self._dbcontext.createSession()
-        query = select(TicketType)
+        query = select(TicketTypeModel)
         records = session.execute(query).fetchall()
         for record in records:
             entity: TicketType = self._to_entity(record[0])

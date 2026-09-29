@@ -9,12 +9,13 @@ fastapi-versioning
 gunicorn
 httpx
 loguru
+psycopg
 pydantic
 pyjwt
 python-dotenv
 pytest
 python-multipart
 psycopg2-binary
-SQLAlchemy==2.0.19
+SQLAlchemy==2.0.31
 sqlalchemy-utils
 uvicorn

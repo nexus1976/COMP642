@@ -14,3 +14,8 @@ All dependent components are composable locally with Docker. Simply run the foll
 - Redis
 - API (Backend Python FastAPI)
 - Web app (Frontend Angular)
+
+The Postgres image creates the tables defined by the SQLAlchemy models in
+`api/infrastructure/postgres` and loads synthetic sample records from
+`postgres/initialize-database.sql` when PostgreSQL initializes a new data
+directory. Existing PostgreSQL data volumes are not reinitialized.

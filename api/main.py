@@ -4,10 +4,9 @@ from typing import List
 from fastapi import FastAPI, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from api.infrastructure.postgres.dbcontext import DBContext
-
-from services.events_router import router as events_router
-from services.users_router import router as users_router
-from services.orders_router import router as orders_router
+from api.services.events_router import router as events_router
+from api.services.users_router import router as users_router
+from api.services.orders_router import router as orders_router
 
 VERSION: str = '1.0.1'
 app = FastAPI(

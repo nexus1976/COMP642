@@ -4,7 +4,7 @@ from typing import Any, Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
 from api.infrastructure.postgres.dbcontext import DBContext
-from models.order import Order
+from api.models.order import Order
 from api.infrastructure.postgres.orders import Order as OrderModel
 
 class OrderRepository():

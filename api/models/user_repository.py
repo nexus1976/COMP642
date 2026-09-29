@@ -3,7 +3,7 @@ from typing import Any, Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
 from api.infrastructure.postgres.dbcontext import DBContext
-from models.user import User
+from api.models.user import User
 from api.infrastructure.postgres.users import User as UserModel
 
 class UserRepository():

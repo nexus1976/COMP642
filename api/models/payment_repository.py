@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
 from api.infrastructure.postgres.dbcontext import DBContext
-from models.payment import Payment
+from api.models.payment import Payment
 from api.infrastructure.postgres.payments import Payment as PaymentModel
 
 UNKNOWN_PAYMENT_METHOD = "unknown"

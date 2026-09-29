@@ -5,10 +5,10 @@ from typing import Any, Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
 from api.infrastructure.postgres.dbcontext import DBContext
-from models.event import Event
+from api.models.event import Event
 from api.infrastructure.postgres.events import Event as EventModel
 
-class EventRepository():
+class EventRepository:
     def __init__(self, dbcontext: DBContext) -> None:
         self._dbcontext: DBContext = dbcontext
 
@@ -41,7 +41,7 @@ class EventRepository():
          session.close()
          return event
 
-     def update(self, event: Event) -> Optional[Event]:  # type: ignore[override]
+    def update(self, event: Event) -> Optional[Event]:  # type: ignore[override]
         session: Session = self._dbcontext.createSession()
         record = session.query(EventModel).filter(EventModel.id == event.id).first()
         if not record:

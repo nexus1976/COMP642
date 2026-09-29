@@ -36,7 +36,7 @@ services:
       - POSTGRES_PASSWORD=password1234
       - POSTGRES_DB=group4db
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - comp642-gp-db-data:/var/lib/postgresql/comp642-gp-db-data
 
   comp642-api:
     build:
@@ -50,7 +50,7 @@ services:
       - local-redis
       - local-postgres
     environment:
-      - DB_HOST=localhost
+      - DB_HOST=local-postgres
       - DB_UID=dbuser
       - DB_NAME=group4db
       - DB_PWD=password1234
@@ -66,4 +66,4 @@ services:
 volumes:
   mongo_data:
   redis_data:
-  postgres_data:
+  comp642-gp-db-data:
