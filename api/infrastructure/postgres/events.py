@@ -1,7 +1,7 @@
 import uuid
 import datetime
 import sqlalchemy
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, DATE
 from .base import Base
@@ -14,8 +14,8 @@ class Event(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(1024), nullable=True)
     date: Mapped[datetime.date] = mapped_column(DATE, nullable=False)
-    location: Mapped[str] = mapped_column(String(255), nullable=False)
+    venue_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("venues.id"), nullable=False)
     price: Mapped[Decimal] = mapped_column(DOUBLE_PRECISION, nullable=False)
 
     def __repr__(self):
-        return f"<Event(id={self.id}, name={self.name}, description={self.description}, date={self.date}, location={self.location}, price={self.price})>"
+        return f"<Event(id={self.id}, name={self.name}, description={self.description}, date={self.date}, venue_id={self.venue_id}, price={self.price})>"

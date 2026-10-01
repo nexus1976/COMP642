@@ -16,6 +16,7 @@ python-dotenv
 pytest
 python-multipart
 psycopg2-binary
+pymongo
 SQLAlchemy==2.0.31
 sqlalchemy-utils
 uvicorn

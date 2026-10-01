@@ -4,7 +4,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import * # type: ignore
 from api.infrastructure.postgres.dbcontext import DBContext
-from models.orderitem import OrderItem
+from api.models.orderitem import OrderItem
 from api.infrastructure.postgres.orderitem import OrderItem as OrderItemModel
 from api.infrastructure.postgres.orders import Order as OrderModel
 
@@ -32,15 +32,24 @@ class OrderItemRepository():
             price=entity.price,
         )
 
-    def add(self, orderItem: OrderItem) -> OrderItem #type: ignore[override]
-        session: Session = self._dbcontext.createSession()
-        entity = self._to_model(orderItem)
-        session.add(entity)
-        session.commit()
-        session.close()
+    def add(self, orderItem: OrderItem, session: Optional[Session] = None) -> OrderItem:  # type: ignore[override]
+        owns_session = session is None
+        session = session or self._dbcontext.createSession()
+        try:
+            entity = self._to_model(orderItem)
+            session.add(entity)
+            if owns_session:
+                session.commit()
+        except Exception:
+            if owns_session:
+                session.rollback()
+            raise
+        finally:
+            if owns_session:
+                session.close()
         return orderItem
 
-     def update(self, orderItem: OrderItem) -> Optional[OrderItem]:  # type: ignore[override]
+    def update(self, orderItem: OrderItem) -> Optional[OrderItem]:  # type: ignore[override]
         session: Session = self._dbcontext.createSession()
         record = session.query(OrderItemModel).filter(OrderItemModel.id == orderItem.id).first()
         if not record:

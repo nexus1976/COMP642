@@ -7,5 +7,5 @@ class Event(BaseModel):
     name: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
     date: datetime.date = Field(...)
-    location: str = Field(..., min_length=1)
+    venue_id: uuid.UUID = Field(...)
     price: float = Field(0)

@@ -11,8 +11,10 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=dbuser
       - MONGO_INITDB_ROOT_PASSWORD=password1234
+      - MONGO_INITDB_DATABASE=group4db
     volumes:
       - mongo_data:/data/db
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   local-redis:
     build:
@@ -54,6 +56,9 @@ services:
       - DB_UID=dbuser
       - DB_NAME=group4db
       - DB_PWD=password1234
+      - MONGO_HOST=local-mongodb
+      - MONGO_USERNAME=dbuser
+      - MONGO_PASSWORD=password1234
 
   comp642-web:
     image: comp642-web

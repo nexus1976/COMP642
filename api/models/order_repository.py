@@ -31,13 +31,22 @@ class OrderRepository():
             status=entity.status,
         )
 
-    def add(self, order: Order) -> Order:  # type: ignore[override]
-         session: Session = self._dbcontext.createSession()
-         entity = self._to_model(order)
-         session.add(entity)
-         session.commit()
-         session.close()
-         return order
+    def add(self, order: Order, session: Optional[Session] = None) -> Order:  # type: ignore[override]
+        owns_session = session is None
+        session = session or self._dbcontext.createSession()
+        try:
+            entity = self._to_model(order)
+            session.add(entity)
+            if owns_session:
+                session.commit()
+        except Exception:
+            if owns_session:
+                session.rollback()
+            raise
+        finally:
+            if owns_session:
+                session.close()
+        return order
 
     def update(self, order: Order) -> Optional[Order]:  # type: ignore[override]
         session: Session = self._dbcontext.createSession()

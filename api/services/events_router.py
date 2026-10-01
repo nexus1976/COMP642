@@ -2,6 +2,10 @@ import uuid
 import os
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Response
+from fastapi.encoders import jsonable_encoder
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError
+from bson.binary import Binary, UuidRepresentation
 from api.infrastructure.postgres.dbcontext import DBContext
 from api.models.event import Event
 from api.models.review import Review
@@ -27,15 +31,38 @@ async def get_event(res: Response, id: uuid.UUID) -> Event | None:
 
 @router.get("/events/{id}/content")
 async def get_event_content(res: Response, id: uuid.UUID):
-    # Replace with MongoDB content document later
-    return {
-        "event_id": id,
-        "content": {
-            "description": "Event description and rich content",
-            "highlights": ["Keynote", "Networking", "VIP access"],
-            "schedule": []
-        }
-    }
+    mongo_host = os.getenv("MONGO_HOST", "localhost")
+    mongo_username = os.getenv("MONGO_USERNAME", "dbuser")
+    mongo_password = os.getenv("MONGO_PASSWORD", "password1234")
+
+    try:
+        with MongoClient(
+            host=mongo_host,
+            port=27017,
+            username=mongo_username,
+            password=mongo_password,
+            authSource="admin",
+            uuidRepresentation="standard",
+            serverSelectionTimeoutMS=5000,
+        ) as client:
+            content = client["group4db"]["event_content"].find_one(
+                {"eventId": Binary.from_uuid(id, UuidRepresentation.STANDARD)},
+                {"_id": 0},
+            )
+    except PyMongoError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to retrieve event content.",
+        ) from exc
+
+    if content is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event content not found.",
+        )
+
+    res.status_code = status.HTTP_200_OK
+    return jsonable_encoder(content)
 
 @router.post("/events/{id}/reviews", status_code=status.HTTP_201_CREATED | status.HTTP_500_INTERNAL_SERVER_ERROR)
 async def create_event_review(id: uuid.UUID, payload: Review):

@@ -18,7 +18,7 @@ class EventRepository:
             name=model.name,
             description=model.description,
             date=model.date,
-            location=model.location,
+            venue_id=model.venue_id,
             price=float(model.price)
         )
         return event
@@ -29,7 +29,7 @@ class EventRepository:
             name=entity.name,
             description=entity.description,
             date=entity.date,
-            location=entity.location,
+            venue_id=entity.venue_id,
             price=Decimal(str(entity.price)),
         )
 
@@ -50,7 +50,7 @@ class EventRepository:
         record.name = event.name
         record.description = event.description
         record.date = event.date
-        record.location = event.location
+        record.venue_id = event.venue_id
         record.price = Decimal(event.price)
         session.commit()
         session.close()
