@@ -59,6 +59,7 @@ services:
       - MONGO_HOST=local-mongodb
       - MONGO_USERNAME=dbuser
       - MONGO_PASSWORD=password1234
+      - REDIS_HOST=local-redis
 
   comp642-web:
     image: comp642-web

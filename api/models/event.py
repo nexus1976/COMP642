@@ -1,5 +1,6 @@
 import uuid
 import datetime
+from typing import Any, Dict
 from pydantic import BaseModel, Field
 
 class Event(BaseModel):
@@ -9,3 +10,4 @@ class Event(BaseModel):
     date: datetime.date = Field(...)
     venue_id: uuid.UUID = Field(...)
     price: float = Field(0)
+    content: Dict[str, Any] | None = None
