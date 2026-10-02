@@ -9,6 +9,7 @@ db.event_content.createIndex({ eventId: 1 }, { unique: true });
 db.event_content.insertMany([
     {
         eventId: UUID('20000000-0000-4000-8000-000000000001'),
+        Genre: 'Indie Rock',
         Description: {
             summary: 'An evening of emerging independent artists and local music makers.',
             ageRestriction: 'All ages',
@@ -31,6 +32,7 @@ db.event_content.insertMany([
     },
     {
         eventId: UUID('20000000-0000-4000-8000-000000000002'),
+        Genre: 'Stand-up Comedy',
         Description: {
             summary: 'A night of stand-up comedy from local performers.',
             ageRestriction: '18+',
@@ -52,6 +54,7 @@ db.event_content.insertMany([
     },
     {
         eventId: UUID('20000000-0000-4000-8000-000000000003'),
+        Genre: 'Contemporary Drama',
         Description: {
             summary: 'A contemporary theater production exploring family and memory.',
             ageRestriction: '12+',
@@ -77,6 +80,7 @@ db.event_content.insertMany([
 // The same collection also supports insertOne for individual event documents.
 db.event_content.insertOne({
     eventId: UUID('20000000-0000-4000-8000-000000000004'),
+    Genre: 'Multi-genre',
     Description: {
         summary: 'A full-day outdoor festival combining live music, food, and community activities.',
         ageRestriction: 'All ages',

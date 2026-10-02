@@ -1,7 +1,7 @@
 import uuid
 import os
-from typing import List
-from fastapi import APIRouter, HTTPException, status, Response
+from typing import Any, Dict, List
+from fastapi import APIRouter, HTTPException, Query, status, Response
 from fastapi.encoders import jsonable_encoder
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
@@ -12,6 +12,30 @@ from api.models.review import Review
 from api.models.event_repository import EventRepository
 
 router = APIRouter(tags=["events"])
+
+def find_event_content(query: Dict[str, Any]) -> List[Dict[str, Any]]:
+    mongo_host = os.getenv("MONGO_HOST", "localhost")
+    mongo_username = os.getenv("MONGO_USERNAME", "dbuser")
+    mongo_password = os.getenv("MONGO_PASSWORD", "password1234")
+
+    try:
+        with MongoClient(
+            host=mongo_host,
+            port=27017,
+            username=mongo_username,
+            password=mongo_password,
+            authSource="admin",
+            uuidRepresentation="standard",
+            serverSelectionTimeoutMS=5000,
+        ) as client:
+            return list(
+                client["group4db"]["event_content"].find(query, {"_id": 0})
+            )
+    except PyMongoError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to search event content.",
+        ) from exc
 
 @router.get("/events", status_code=status.HTTP_200_OK | status.HTTP_500_INTERNAL_SERVER_ERROR)
 async def list_events(res: Response) -> List[Event]:
@@ -158,6 +182,79 @@ async def delete_event_reviews(res: Response, id: uuid.UUID, reviewer: str):
         "reviewer": reviewer,
         "deleted_reviews": deleted_reviews,
     }
+
+@router.get("/events/search/tags/{tag}")
+async def find_events_by_tag(tag: str):
+    documents = find_event_content({"Tags": tag})
+    return jsonable_encoder(documents)
+
+@router.get("/events/search/speakers/{speaker}")
+async def find_events_by_speaker(speaker: str):
+    documents = find_event_content({"Speakers.name": speaker})
+    return jsonable_encoder(documents)
+
+@router.get("/events/search/reviews")
+async def find_events_by_review_rating(
+    rating: int = Query(..., ge=1, le=5, description="Return events with a review above this rating."),
+):
+    documents = find_event_content({
+        "Reviews": {
+            "$elemMatch": {
+                "rating": {"$gte": rating},
+            }
+        }
+    })
+    return jsonable_encoder(documents)
+
+@router.get("/events/search/attributes")
+async def find_events_by_nested_attributes(
+    speaker_role: str | None = None,
+    speaker_topic: str | None = None,
+    min_review_rating: int | None = Query(None, ge=1, le=5),
+    age_restriction: str | None = None,
+    tag: str | None = None,
+):
+    conditions: List[Dict[str, Any]] = []
+
+    speaker_attributes = {
+        key: value
+        for key, value in {
+            "role": speaker_role,
+            "topic": speaker_topic,
+        }.items()
+        if value is not None
+    }
+    if speaker_attributes:
+        conditions.append({"Speakers": {"$elemMatch": speaker_attributes}})
+    if min_review_rating is not None:
+        conditions.append({
+            "Reviews": {
+                "$elemMatch": {"rating": {"$gte": min_review_rating}}
+            }
+        })
+    if age_restriction is not None:
+        conditions.append({"Description.ageRestriction": age_restriction})
+    if tag is not None:
+        conditions.append({"Tags": tag})
+
+    if not conditions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Provide at least one nested attribute to search for.",
+        )
+
+    documents = find_event_content({"$and": conditions})
+    return jsonable_encoder(documents)
+
+@router.get("/events/search/concerts/genre/{genre}")
+async def find_concerts_by_genre(genre: str):
+    documents = find_event_content({
+        "$and": [
+            {"Tags": "concert"},
+            {"$or": [{"Genre": genre}, {"Tags": genre}]},
+        ]
+    })
+    return jsonable_encoder(documents)
 
 @router.get("/trending")
 async def get_trending_events():

@@ -35,17 +35,11 @@ See `/mongo/mongo-init.js` for the creation of the database and collection. This
 See the endpoint defined in `api/services/events_router.py` the `get_event_content` method to see the use of `find()`.
 See the endpoint defined in `api/services/events_router.py` the `create_event_review` method to see the use of Updates.
 See the endpoint defined in `api/services/events_router.py` the `delete_event_reviews` method to see the use of Deletes.
+See the following endpoints defined in `api/services/events_router.py` to see demonstrations of the following queries (which also demonstrates use of projections, comparison and boolean operators, dot notation, and $elemMatch):
+- Find events containing a particular tag.
+- Find events featuring a particular speaker.
+- Find events with reviews above a specified rating.
+- Find events containing particular combinations of nested attributes.
+- Find concerts belonging to a particular genre.
 
-WIP: Still need to demonstrate 8 meaningful queries against MongoDB and cover:
-- Projection
-- Comparison operators
-- Boolean operators
-- Dot notation
-- $elemMatch
-
-Include these queries:
-Find events containing a particular tag.
-Find events featuring a particular speaker.
-Find events with reviews above a specified rating.
-Find events containing particular combinations of nested attributes.
-Find concerts belonging to a particular genre.
+### Part C
