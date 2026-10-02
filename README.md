@@ -47,3 +47,8 @@ See the following endpoints defined in `api/services/events_router.py` to see de
 - Find concerts belonging to a particular genre (method `find_concerts_by_genre`).
 
 ### Part C
+#### Use Case 1
+See the endpoint defined in `api/services/events_router.py` the `get_event` method to see the caching pattern using a 1 minute TTL. Calls to this method also increment a counter in Redis for the given event id.
+
+#### Use Case 2
+See the endpoint defined in `api/services/events_router.py` the `get_trending_events` method to see us grabbing the top 10 trending events by score from Redis.

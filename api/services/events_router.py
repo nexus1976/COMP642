@@ -17,6 +17,27 @@ from api.models.event_repository import EventRepository
 
 router = APIRouter(tags=["events"])
 
+# Redis sorted set: member = event id, score = number of views
+TRENDING_KEY = "trending:events"
+TRENDING_LIMIT = 10
+
+def get_redis_client() -> Redis:
+    return Redis(
+        host=os.getenv("REDIS_HOST", "localhost"),
+        port=6379,
+        db=0,
+        decode_responses=True,
+        socket_connect_timeout=1,
+        socket_timeout=1,
+    )
+
+def increment_trending_score(redis_client: Redis, event_id: uuid.UUID) -> None:
+    """Add 1 to the event's trending score. Never fails the request."""
+    try:
+        redis_client.zincrby(TRENDING_KEY, 1, str(event_id))
+    except RedisError:
+        pass
+
 def find_event_content(query: Dict[str, Any]) -> List[Dict[str, Any]]:
     mongo_host = os.getenv("MONGO_HOST", "localhost")
     mongo_username = os.getenv("MONGO_USERNAME", "dbuser")
@@ -52,20 +73,14 @@ async def list_events(res: Response) -> List[Event]:
 @router.get("/events/{id}", status_code=status.HTTP_200_OK | status.HTTP_500_INTERNAL_SERVER_ERROR)
 async def get_event(res: Response, id: uuid.UUID) -> Event | None:
     cache_key = f"event:{id}"
-    redis_client = Redis(
-        host=os.getenv("REDIS_HOST", "localhost"),
-        port=6379,
-        db=0,
-        decode_responses=True,
-        socket_connect_timeout=1,
-        socket_timeout=1,
-    )
+    redis_client = get_redis_client()
 
     try:
         cached_event = redis_client.get(cache_key)
         if cached_event is not None:
             try:
                 response = Event.parse_raw(str(cached_event))
+                increment_trending_score(redis_client, id)
                 res.status_code = status.HTTP_200_OK
                 return response
             except (ValidationError, ValueError):
@@ -92,8 +107,11 @@ async def get_event(res: Response, id: uuid.UUID) -> Event | None:
         except RedisError:
             pass
 
+        # Only count views for events that actually exist
+        increment_trending_score(redis_client, id)
+
     res.status_code = status.HTTP_200_OK
-    return response   
+    return response
 
 @router.get("/events/{id}/content")
 async def get_event_content(res: Response, id: uuid.UUID):
@@ -300,10 +318,20 @@ async def find_concerts_by_genre(genre: str):
 
 @router.get("/trending")
 async def get_trending_events():
-    # Replace with Redis-backed trending list later
+    redis_client = get_redis_client()
+ 
+    try:
+        # Highest score first, top 10 only
+        trending = redis_client.zrevrange(TRENDING_KEY, 0, TRENDING_LIMIT - 1, withscores=True)
+    except RedisError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to retrieve trending events.",
+        ) from exc
+ 
     return {
         "items": [
-            {"event_id": "evt_123", "score": 98},
-            {"event_id": "evt_456", "score": 86}
+            {"event_id": event_id, "score": int(score)}
+            for event_id, score in trending # type: ignore
         ]
     }
