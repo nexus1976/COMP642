@@ -71,22 +71,27 @@ async def list_events(res: Response) -> List[Event]:
     return response
 
 @router.get("/events/{id}", status_code=status.HTTP_200_OK | status.HTTP_500_INTERNAL_SERVER_ERROR)
-async def get_event(res: Response, id: uuid.UUID) -> Event | None:
+async def get_event(
+    res: Response,
+    id: uuid.UUID,
+    bypass_cache: bool = Query(False, description="Skip the event Redis cache."),
+) -> Event | None:
     cache_key = f"event:{id}"
     redis_client = get_redis_client()
 
-    try:
-        cached_event = redis_client.get(cache_key)
-        if cached_event is not None:
-            try:
-                response = Event.parse_raw(str(cached_event))
-                increment_trending_score(redis_client, id)
-                res.status_code = status.HTTP_200_OK
-                return response
-            except (ValidationError, ValueError):
-                redis_client.delete(cache_key)
-    except RedisError:
-        pass
+    if not bypass_cache:
+        try:
+            cached_event = redis_client.get(cache_key)
+            if cached_event is not None:
+                try:
+                    response = Event.parse_raw(str(cached_event))
+                    increment_trending_score(redis_client, id)
+                    res.status_code = status.HTTP_200_OK
+                    return response
+                except (ValidationError, ValueError):
+                    redis_client.delete(cache_key)
+        except RedisError:
+            pass
 
     dbcontext: DBContext = DBContext(host=os.environ['DB_HOST'], dbname=os.environ['DB_NAME'], username=os.environ['DB_UID'], password=os.environ['DB_PWD'])
     eventRepo: EventRepository = EventRepository(dbcontext=dbcontext)
@@ -98,14 +103,15 @@ async def get_event(res: Response, id: uuid.UUID) -> Event | None:
         response.content = content_documents[0] if content_documents else None
 
     if response is not None:
-        try:
-            redis_client.set(
-                cache_key,
-                json.dumps(jsonable_encoder(response)),
-                ex=60,
-            )
-        except RedisError:
-            pass
+        if not bypass_cache:
+            try:
+                redis_client.set(
+                    cache_key,
+                    json.dumps(jsonable_encoder(response)),
+                    ex=60,
+                )
+            except RedisError:
+                pass
 
         # Only count views for events that actually exist
         increment_trending_score(redis_client, id)
