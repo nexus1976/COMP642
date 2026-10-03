@@ -14,10 +14,11 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render all backend endpoint cards', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, comp642');
+    expect(compiled.querySelector('h1')?.textContent).toContain('API Playground');
+    expect(compiled.querySelectorAll('.endpoint-card').length).toBe(17);
   });
 });

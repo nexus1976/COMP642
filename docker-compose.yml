@@ -67,6 +67,8 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+    depends_on:
+      - comp642-api
     ports:
       - "8096:8096"
 volumes:
