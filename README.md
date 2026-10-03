@@ -8,6 +8,8 @@
 All dependent components are composable locally with Docker. Simply run the following command at the root of this repo:
 `docker compose up -d`
 
+Once you've docker compose up the solution, you can navigate to `http://localhost:8096` in order to see a basic frontend app that demonstrates all of the prescribed backend endpoints.
+
 ## Components
 - Mongo
 - Postgres
